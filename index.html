@@ -74,6 +74,11 @@ button{border:0;border-radius:12px;padding:13px 15px;font:700 15px inherit;curso
  <h2>Fahrten in diesem Monat</h2>
  <div id="trips"><div class="empty">Noch keine Fahrten eingetragen.</div></div>
 </section>
+<section class="card">
+ <h2>Monatsübersicht</h2>
+ <p class="note">Tippe auf einen Monat, um alle Fahrten und die Kilometerbilanz anzusehen.</p>
+ <div id="history"></div>
+</section>
 <p class="note" style="text-align:center;padding:4px 10px">Deine Daten werden lokal auf diesem Gerät gespeichert. Es gibt keine automatische GPS-Aufzeichnung und keine Synchronisierung zwischen Geräten.</p>
 </main>
 <script>
@@ -84,6 +89,9 @@ let data=JSON.parse(localStorage.getItem(storeKey)||'null');
 if(!data)data={limit:1500,months:{},trips:[]};
 const current=monthKey();
 if(!data.months[current])data.months[current]={baseline:current==='2026-11'?580:0};
+let expandedMonth=current;
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function monthName(key){const [y,m]=key.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('de-DE',{month:'long',year:'numeric'})}
 function save(){localStorage.setItem(storeKey,JSON.stringify(data));render()}
 function fmt(n){return Number(n).toLocaleString('de-DE',{maximumFractionDigits:1})}
 function monthTrips(){return data.trips.filter(t=>t.date&&t.date.slice(0,7)===current)}
@@ -101,6 +109,30 @@ function render(){
  const sorted=[...trips].sort((a,b)=>b.date.localeCompare(a.date));
  if(!sorted.length)list.innerHTML='<div class="empty">Noch keine Fahrten eingetragen.</div>';
  sorted.forEach(t=>{const row=document.createElement('div');row.className='trip';const left=document.createElement('div');const route=document.createElement('div');route.className='triproute';route.textContent=`${t.from} → ${t.to}`;const meta=document.createElement('div');meta.className='tripmeta';meta.textContent=new Date(t.date+'T12:00:00').toLocaleDateString('de-DE');left.append(route,meta);const right=document.createElement('div');right.style.display='flex';right.style.alignItems='center';right.style.gap='9px';const val=document.createElement('span');val.className='tripkm';val.textContent=fmt(t.km)+' km';const del=document.createElement('button');del.className='danger';del.textContent='Löschen';del.onclick=()=>{data.trips=data.trips.filter(x=>x.id!==t.id);save()};right.append(val,del);row.append(left,right);list.append(row)});
+ const keys=[...new Set([current,...Object.keys(data.months||{}),...data.trips.map(t=>t.date?.slice(0,7)).filter(Boolean)])].filter(k=>/^\d{4}-\d{2}$/.test(k)).sort().reverse();
+ const history=$('history');history.innerHTML='';
+ keys.forEach(key=>{
+   const monthData=data.months[key]||{baseline:0};
+   const monthTrips=data.trips.filter(t=>t.date?.slice(0,7)===key).sort((a,b)=>b.date.localeCompare(a.date));
+   const amount=Number(monthData.baseline||0)+monthTrips.reduce((s,t)=>s+Number(t.km||0),0);
+   const remain=limit-amount;
+   const panel=document.createElement('div');panel.style.cssText='background:var(--panel2);border-radius:14px;padding:13px;margin-top:10px';
+   const heading=document.createElement('button');heading.className='secondary';heading.style.cssText='width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;padding:3px 0;background:transparent';
+   heading.textContent=monthName(key)+(key===current?' · Aktuell':'');
+   const arrow=document.createElement('span');arrow.textContent=expandedMonth===key?'⌃':'⌄';heading.append(arrow);
+   heading.onclick=()=>{expandedMonth=expandedMonth===key?'':key;render()};panel.append(heading);
+   const summary=document.createElement('div');summary.className='stats';summary.style.marginTop='12px';
+   summary.innerHTML='<span>Gefahren: <b>'+fmt(amount)+' km</b></span><span>Übrig: <b style="color:'+(remain<0?'var(--red)':'var(--green)')+'">'+fmt(remain)+' km</b></span>';panel.append(summary);
+   const bar=document.createElement('div');bar.className='track';bar.style.margin='10px 0 0';const fill=document.createElement('div');fill.className='fill';fill.style.width=Math.min(100,Math.max(0,amount/limit*100))+'%';if(remain<0)fill.style.background='var(--red)';bar.append(fill);panel.append(bar);
+   if(expandedMonth===key){
+     const detail=document.createElement('div');detail.style.cssText='border-top:1px solid var(--line);margin-top:12px;padding-top:10px';
+     if(Number(monthData.baseline||0)>0){const initial=document.createElement('p');initial.className='note';initial.textContent='Bereits gefahren (Startwert): '+fmt(monthData.baseline)+' km';detail.append(initial)}
+     if(!monthTrips.length){const empty=document.createElement('p');empty.className='note';empty.textContent='Keine einzelnen Fahrten für diesen Monat gespeichert.';detail.append(empty)}
+     monthTrips.forEach(t=>{const item=document.createElement('div');item.className='trip';const a=document.createElement('div');const title=document.createElement('div');title.className='triproute';title.textContent=t.from+' → '+t.to;const date=document.createElement('div');date.className='tripmeta';date.textContent=new Date(t.date+'T12:00:00').toLocaleDateString('de-DE');a.append(title,date);const km=document.createElement('span');km.className='tripkm';km.textContent=fmt(t.km)+' km';item.append(a,km);detail.append(item)});
+     panel.append(detail);
+   }
+   history.append(panel);
+ });
 }
 $('date').value=new Date().toISOString().slice(0,10);
 $('add').onclick=()=>{const from=$('from').value.trim(),to=$('to').value.trim(),km=Number($('km').value),date=$('date').value;if(!from||!to||!date||!Number.isFinite(km)||km<=0){alert('Bitte Start, Ziel, Kilometer und Datum vollständig eintragen.');return}data.trips.push({id:Date.now().toString(),from,to,km,date});$('from').value='';$('to').value='';$('km').value='';save()};
