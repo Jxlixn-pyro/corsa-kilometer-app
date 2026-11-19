@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101916">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Corsa KM">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Corsa Kilometer-Manager</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1412;--panel:#17211d;--panel2:#202c27;--text:#f3f7f4;--muted:#a5b5ac;--green:#54d69a;--red:#ff7474;--line:#304139}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#14221c,#0b100f 55%);color:var(--text);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:620px;margin:auto;padding:env(safe-area-inset-top) 17px calc(28px + env(safe-area-inset-bottom))}
+header{padding:25px 2px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--green);font-weight:800}.title{font-size:25px;font-weight:800;margin-top:4px}.month{font-size:13px;color:var(--muted);text-align:right}
+.card{background:rgba(23,33,29,.96);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 12px 35px #0002}
+.kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.big{font-size:42px;font-weight:850;letter-spacing:-.04em;margin:7px 0 3px}.green{color:var(--green)}.red{color:var(--red)}
+.track{height:12px;background:#34423b;border-radius:99px;overflow:hidden;margin:17px 0 10px}.fill{height:100%;width:0;background:var(--green);border-radius:99px;transition:width .2s}
+.stats{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px}.stats b{color:var(--text)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.statbox{background:var(--panel2);padding:12px;border-radius:14px}.statbox small{display:block;color:var(--muted);font-size:12px}.statbox strong{display:block;font-size:20px;margin-top:4px}
+h2{font-size:17px;margin:0 0 14px}label{display:block;color:var(--muted);font-size:13px;margin:11px 0 6px}
+input{width:100%;background:#0e1713;color:var(--text);border:1px solid #3a4a41;border-radius:12px;padding:13px 12px;font:inherit;outline:none}
+input:focus{border-color:var(--green)}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;border-radius:12px;padding:13px 15px;font:700 15px inherit;cursor:pointer}
+.primary{width:100%;background:var(--green);color:#082016;margin-top:14px}.secondary{background:#293830;color:var(--text)}.danger{background:#3b2424;color:#ffaaaa;padding:8px 11px}
+.trip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line)}.trip:first-child{border-top:0}.triproute{font-weight:700}.tripmeta{color:var(--muted);font-size:12px;margin-top:4px}.tripkm{font-weight:800;white-space:nowrap}
+.note{font-size:12px;color:var(--muted);line-height:1.5}.empty{color:var(--muted);font-size:14px;padding:12px 0}
+.settings{display:flex;justify-content:space-between;align-items:center;gap:12px}.settings input{max-width:130px}
+.install{display:none;background:#22392e;border:1px solid #3c6c52;color:#c8ffe0;border-radius:14px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.4}
+@media(max-width:380px){.big{font-size:36px}.stats{font-size:12px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+ <div><div class="brand">Dein Auto-Abo</div><div class="title">Corsa Kilometer-Manager</div></div>
+ <div class="month" id="monthLabel"></div>
+</header>
+<div class="install" id="installHint">Tipp: In Safari auf <b>Teilen</b> tippen und <b>Zum Home-Bildschirm</b> wählen.</div>
+<section class="card">
+ <div class="kicker">Noch verfügbar</div>
+ <div class="big green" id="remaining">920 km</div>
+ <div class="track"><div class="fill" id="progress"></div></div>
+ <div class="stats"><span>Verbraucht: <b id="usedText">580 km</b></span><span>Limit: <b id="limitText">1.500 km</b></span></div>
+ <div class="grid">
+  <div class="statbox"><small>Gefahren diesen Monat</small><strong id="totalText">580 km</strong></div>
+  <div class="statbox"><small>Durchschnitt pro Tag</small><strong id="dailyText">—</strong></div>
+ </div>
+ <p class="note" id="forecast" style="margin:14px 0 0"></p>
+</section>
+<section class="card">
+ <h2>Neue Fahrt eintragen</h2>
+ <div class="formgrid">
+  <div><label for="from">Von</label><input id="from" placeholder="z. B. Gotha"></div>
+  <div><label for="to">Nach</label><input id="to" placeholder="z. B. Erfurt"></div>
+ </div>
+ <div class="formgrid">
+  <div><label for="km">Kilometer</label><input id="km" type="number" min="0.1" step="0.1" placeholder="z. B. 25"></div>
+  <div><label for="date">Datum</label><input id="date" type="date"></div>
+ </div>
+ <button class="primary" id="add">+ Fahrt hinzufügen</button>
+ <p class="note">Trage die tatsächlich gefahrene Gesamtstrecke ein (Hin- und Rückfahrt zusammen, falls beides stattgefunden hat).</p>
+</section>
+<section class="card">
+ <h2>Monatsbudget</h2>
+ <div class="settings"><div><label for="limit">Freikilometer pro Monat</label><input id="limit" type="number" min="1" step="1" value="1500"></div><div><label for="baseline">Schon gefahren (Startwert)</label><input id="baseline" type="number" min="0" step="1" value="580"></div></div>
+ <p class="note">Der Startwert gilt für diesen Monat. Ab dem nächsten Monat startet der neue Monat automatisch mit 0 km Startwert. Deine eingetragenen Fahrten bleiben in der Historie erhalten.</p>
+</section>
+<section class="card">
+ <h2>Fahrten in diesem Monat</h2>
+ <div id="trips"><div class="empty">Noch keine Fahrten eingetragen.</div></div>
+</section>
+<p class="note" style="text-align:center;padding:4px 10px">Deine Daten werden lokal auf diesem Gerät gespeichert. Es gibt keine automatische GPS-Aufzeichnung und keine Synchronisierung zwischen Geräten.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const monthKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
+const storeKey='corsa-km-manager-v1';
+let data=JSON.parse(localStorage.getItem(storeKey)||'null');
+if(!data)data={limit:1500,months:{},trips:[]};
+const current=monthKey();
+if(!data.months[current])data.months[current]={baseline:current==='2026-11'?580:0};
+function save(){localStorage.setItem(storeKey,JSON.stringify(data));render()}
+function fmt(n){return Number(n).toLocaleString('de-DE',{maximumFractionDigits:1})}
+function monthTrips(){return data.trips.filter(t=>t.date&&t.date.slice(0,7)===current)}
+function render(){
+ const m=data.months[current];const limit=Number(data.limit)||1500;const trips=monthTrips();const tripKm=trips.reduce((s,t)=>s+Number(t.km),0);const used=Number(m.baseline||0)+tripKm;const left=limit-used;const pct=Math.min(100,Math.max(0,used/limit*100));
+ $('monthLabel').textContent=new Date().toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+ $('remaining').textContent=`${fmt(left)} km`;$('remaining').className='big '+(left<0?'red':'green');
+ $('progress').style.width=pct+'%';$('progress').style.background=left<0?'var(--red)':'var(--green)';
+ $('usedText').textContent=fmt(used)+' km';$('limitText').textContent=fmt(limit)+' km';$('totalText').textContent=fmt(used)+' km';
+ const day=new Date().getDate();$('dailyText').textContent=fmt(used/day)+' km';
+ const days=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();const forecast=used/day*days;
+ $('forecast').textContent=`Hochrechnung bis Monatsende: etwa ${fmt(forecast)} km. `+(forecast>limit?'Du könntest dein Limit überschreiten.':'Du liegst voraussichtlich innerhalb deines Limits.');
+ $('limit').value=data.limit;$('baseline').value=m.baseline??0;
+ const list=$('trips');list.innerHTML='';
+ const sorted=[...trips].sort((a,b)=>b.date.localeCompare(a.date));
+ if(!sorted.length)list.innerHTML='<div class="empty">Noch keine Fahrten eingetragen.</div>';
+ sorted.forEach(t=>{const row=document.createElement('div');row.className='trip';const left=document.createElement('div');const route=document.createElement('div');route.className='triproute';route.textContent=`${t.from} → ${t.to}`;const meta=document.createElement('div');meta.className='tripmeta';meta.textContent=new Date(t.date+'T12:00:00').toLocaleDateString('de-DE');left.append(route,meta);const right=document.createElement('div');right.style.display='flex';right.style.alignItems='center';right.style.gap='9px';const val=document.createElement('span');val.className='tripkm';val.textContent=fmt(t.km)+' km';const del=document.createElement('button');del.className='danger';del.textContent='Löschen';del.onclick=()=>{data.trips=data.trips.filter(x=>x.id!==t.id);save()};right.append(val,del);row.append(left,right);list.append(row)});
+}
+$('date').value=new Date().toISOString().slice(0,10);
+$('add').onclick=()=>{const from=$('from').value.trim(),to=$('to').value.trim(),km=Number($('km').value),date=$('date').value;if(!from||!to||!date||!Number.isFinite(km)||km<=0){alert('Bitte Start, Ziel, Kilometer und Datum vollständig eintragen.');return}data.trips.push({id:Date.now().toString(),from,to,km,date});$('from').value='';$('to').value='';$('km').value='';save()};
+$('limit').onchange=()=>{data.limit=Math.max(1,Number($('limit').value)||1500);save()};
+$('baseline').onchange=()=>{data.months[current].baseline=Math.max(0,Number($('baseline').value)||0);save()};
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if(location.protocol==='https:' && !window.navigator.standalone)$('installHint').style.display='block';
+render();
+</script>
+</body>
+</html>

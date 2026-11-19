@@ -1,0 +1,9 @@
+{
+  "name": "Corsa Kilometer-Manager",
+  "short_name": "Corsa KM",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d1412",
+  "theme_color": "#101916",
+  "lang": "de"
+}
