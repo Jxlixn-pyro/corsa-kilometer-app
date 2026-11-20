@@ -1,146 +1,58 @@
-<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#101916">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Corsa KM">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>Corsa Kilometer-Manager</title>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1713"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Corsa KM"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><title>Corsa KM</title>
 <style>
-:root{color-scheme:dark;--bg:#0d1412;--panel:#17211d;--panel2:#202c27;--text:#f3f7f4;--muted:#a5b5ac;--green:#54d69a;--red:#ff7474;--line:#304139}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#14221c,#0b100f 55%);color:var(--text);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-main{max-width:620px;margin:auto;padding:env(safe-area-inset-top) 17px calc(28px + env(safe-area-inset-bottom))}
-header{padding:25px 2px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.brand{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--green);font-weight:800}.title{font-size:25px;font-weight:800;margin-top:4px}.month{font-size:13px;color:var(--muted);text-align:right}
-.card{background:rgba(23,33,29,.96);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 12px 35px #0002}
-.kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.big{font-size:42px;font-weight:850;letter-spacing:-.04em;margin:7px 0 3px}.green{color:var(--green)}.red{color:var(--red)}
-.track{height:12px;background:#34423b;border-radius:99px;overflow:hidden;margin:17px 0 10px}.fill{height:100%;width:0;background:var(--green);border-radius:99px;transition:width .2s}
-.stats{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px}.stats b{color:var(--text)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.statbox{background:var(--panel2);padding:12px;border-radius:14px}.statbox small{display:block;color:var(--muted);font-size:12px}.statbox strong{display:block;font-size:20px;margin-top:4px}
-h2{font-size:17px;margin:0 0 14px}label{display:block;color:var(--muted);font-size:13px;margin:11px 0 6px}
-input{width:100%;background:#0e1713;color:var(--text);border:1px solid #3a4a41;border-radius:12px;padding:13px 12px;font:inherit;outline:none}
-input:focus{border-color:var(--green)}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button{border:0;border-radius:12px;padding:13px 15px;font:700 15px inherit;cursor:pointer}
-.primary{width:100%;background:var(--green);color:#082016;margin-top:14px}.secondary{background:#293830;color:var(--text)}.danger{background:#3b2424;color:#ffaaaa;padding:8px 11px}
-.trip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line)}.trip:first-child{border-top:0}.triproute{font-weight:700}.tripmeta{color:var(--muted);font-size:12px;margin-top:4px}.tripkm{font-weight:800;white-space:nowrap}
-.note{font-size:12px;color:var(--muted);line-height:1.5}.empty{color:var(--muted);font-size:14px;padding:12px 0}
-.settings{display:flex;justify-content:space-between;align-items:center;gap:12px}.settings input{max-width:130px}
-.install{display:none;background:#22392e;border:1px solid #3c6c52;color:#c8ffe0;border-radius:14px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.4}
-@media(max-width:380px){.big{font-size:36px}.stats{font-size:12px}}
-</style>
-</head>
-<body>
-<main>
-<header>
- <div><div class="brand">Dein Auto-Abo</div><div class="title">Corsa Kilometer-Manager</div></div>
- <div class="month" id="monthLabel"></div>
-</header>
-<div class="install" id="installHint">Tipp: In Safari auf <b>Teilen</b> tippen und <b>Zum Home-Bildschirm</b> wählen.</div>
-<section class="card">
- <div class="kicker">Noch verfügbar</div>
- <div class="big green" id="remaining">920 km</div>
- <div class="track"><div class="fill" id="progress"></div></div>
- <div class="stats"><span>Verbraucht: <b id="usedText">580 km</b></span><span>Limit: <b id="limitText">1.500 km</b></span></div>
- <div class="grid">
-  <div class="statbox"><small>Gefahren diesen Monat</small><strong id="totalText">580 km</strong></div>
-  <div class="statbox"><small>Durchschnitt pro Tag</small><strong id="dailyText">—</strong></div>
- </div>
- <p class="note" id="forecast" style="margin:14px 0 0"></p>
-</section>
-<section class="card">
- <h2>Neue Fahrt eintragen</h2>
- <div class="formgrid">
-  <div><label for="from">Von</label><input id="from" placeholder="z. B. Gotha"></div>
-  <div><label for="to">Nach</label><input id="to" placeholder="z. B. Erfurt"></div>
- </div>
- <div class="formgrid">
-  <div><label for="km">Kilometer</label><input id="km" type="number" min="0.1" step="0.1" placeholder="z. B. 25"></div>
-  <div><label for="date">Datum</label><input id="date" type="date"></div>
- </div>
- <button class="primary" id="add">+ Fahrt hinzufügen</button>
- <p class="note">Trage die tatsächlich gefahrene Gesamtstrecke ein (Hin- und Rückfahrt zusammen, falls beides stattgefunden hat).</p>
-</section>
-<section class="card">
- <h2>Monatsbudget</h2>
- <div class="settings"><div><label for="limit">Freikilometer pro Monat</label><input id="limit" type="number" min="1" step="1" value="1500"></div><div><label for="baseline">Schon gefahren (Startwert)</label><input id="baseline" type="number" min="0" step="1" value="580"></div></div>
- <p class="note">Der Startwert gilt für diesen Monat. Ab dem nächsten Monat startet der neue Monat automatisch mit 0 km Startwert. Deine eingetragenen Fahrten bleiben in der Historie erhalten.</p>
-</section>
-<section class="card">
- <h2>Fahrten in diesem Monat</h2>
- <div id="trips"><div class="empty">Noch keine Fahrten eingetragen.</div></div>
-</section>
-<section class="card">
- <h2>Monatsübersicht</h2>
- <p class="note">Tippe auf einen Monat, um alle Fahrten und die Kilometerbilanz anzusehen.</p>
- <div id="history"></div>
-</section>
-<p class="note" style="text-align:center;padding:4px 10px">Deine Daten werden lokal auf diesem Gerät gespeichert. Es gibt keine automatische GPS-Aufzeichnung und keine Synchronisierung zwischen Geräten.</p>
-</main>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;--bg:#0b1310;--card:#18251f;--line:#2c4035;--muted:#9caf9f;--green:#5de0a2;--text:#f3faf6}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1c3528,#0b1310 55%);color:var(--text);min-height:100vh}main{max-width:650px;margin:auto;padding:env(safe-area-inset-top) 16px calc(40px + env(safe-area-inset-bottom))}header{display:flex;align-items:center;gap:12px;padding:20px 0}.brand{flex:1}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.13em;color:var(--green)}h1{font-size:23px;margin:3px 0 0}h2{font-size:19px;margin:0 0 14px}h3{font-size:15px;margin:14px 0 8px}.menu-btn{font-size:25px;width:47px;height:47px;background:#22372b;color:white;border:1px solid #3a5746;border-radius:14px;cursor:pointer}.card{background:var(--card);border:1px solid var(--line);padding:18px;border-radius:21px;margin-bottom:14px;box-shadow:0 9px 26px #0002}.hero{background:linear-gradient(140deg,#1e4532,#17251f)}.label{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.05em}.big{font-size:42px;font-weight:850;letter-spacing:-.045em;margin:7px 0;color:var(--green)}.sub{font-size:13px;color:var(--muted);line-height:1.55}.track{height:11px;background:#34483c;border-radius:30px;overflow:hidden;margin:15px 0}.bar{height:100%;background:var(--green);border-radius:30px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#21342a;border-radius:13px;padding:13px}.stat strong{display:block;font-size:21px;margin-top:4px}.stat small{font-size:11px;color:var(--muted)}label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}input{width:100%;background:#0e1913;color:white;border:1px solid #405649;border-radius:12px;padding:13px;font:inherit;min-width:0}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{font:inherit;cursor:pointer}.primary{border:0;background:var(--green);color:#0a2417;font-weight:800;padding:14px;border-radius:13px;width:100%;margin-top:15px}.secondary{border:1px solid #48614e;background:#24392d;color:white;border-radius:12px;padding:10px 13px}.danger{border:0;background:#422b2b;color:#ffb6b6;border-radius:9px;padding:8px;font-size:12px}.nav{display:none;background:#1b2d23;border:1px solid #41624d;border-radius:16px;margin-bottom:15px;padding:8px}.nav.open{display:block}.nav button{display:block;text-align:left;background:transparent;color:#e9f7ed;border:0;border-bottom:1px solid #304839;padding:14px 12px;width:100%;font-weight:700}.nav button:last-child{border:0}.view{display:none}.view.active{display:block}.trip{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.trip:last-child{border:0}.trip small{display:block;color:var(--muted);margin-top:4px}.right{display:flex;align-items:center;gap:8px}.month{border:1px solid var(--line);border-radius:15px;padding:14px;margin:10px 0;background:#203128}.month-head{width:100%;display:flex;align-items:center;justify-content:space-between;background:transparent;color:white;border:0;text-align:left;padding:0;font-weight:750}.month-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin:11px 0}.month-detail{border-top:1px solid var(--line);padding-top:9px;margin-top:12px}.ledger{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}.ledger small{display:block;color:var(--muted);margin-top:3px}.positive{color:var(--green)}.negative{color:#ffaaa4}.muted{color:var(--muted)}.note{font-size:12px;color:var(--muted);line-height:1.55}.hide{display:none}footer{text-align:center;color:var(--muted);font-size:11px;margin-top:22px}
+</style></head><body><main><header><button class="menu-btn" id="menuBtn" aria-label="Menü öffnen" aria-expanded="false">☰</button><div class="brand"><div class="eyebrow">FINN · AUTO-ABO</div><h1 id="pageTitle">Startseite</h1></div><span style="font-size:28px">🚗</span></header>
+<nav class="nav" id="nav"><button data-view="home">⌂ &nbsp; Startseite</button><button data-view="months">▦ &nbsp; Monatsübersicht</button><button data-view="bank">◉ &nbsp; Kilometertacho / Sparkonto</button><button data-view="fuel">⛽ &nbsp; Tankkosten</button><button data-view="settings">⚙ &nbsp; Einstellungen</button></nav>
+<section class="view active" id="home">
+<div class="card hero"><div class="label">NOCH BIS ZUM MONATLICHEN RICHTWERT</div><div class="big" id="remaining">—</div><div class="track"><div class="bar" id="progress"></div></div><div class="stats"><div class="stat"><small>Dieser Zeitraum</small><strong id="used">—</strong></div><div class="stat"><small>Jahresbudget übrig</small><strong id="annual">—</strong></div></div><p class="sub" id="periodLabel"></p></div>
+<div class="card"><h2>Fahrt eintragen</h2><div class="two"><div><label>Von</label><input id="from" placeholder="Gotha"></div><div><label>Nach</label><input id="to" placeholder="Erfurt"></div></div><div class="two"><div><label>Kilometer</label><input id="km" type="number" step="0.1" min="0.1" placeholder="25"></div><div><label>Datum</label><input id="date" type="date"></div></div><button class="primary" id="addTrip">+ Fahrt speichern</button></div>
+<div class="card"><h2>Fahrten im aktuellen Zeitraum</h2><div id="homeTrips"></div></div></section>
+<section class="view" id="months"><div class="card"><h2>Monatsübersicht</h2><p class="sub">Tippe auf einen Abrechnungsmonat, um die einzelnen Fahrten zu sehen. Die Zeiträume laufen jeweils vom 13. bis zum 12.</p><div id="monthList"></div></div></section>
+<section class="view" id="bank"><div class="card hero"><div class="label">KILOMETER-SPARKONTO</div><div class="big" id="bankBalance">—</div><p class="sub">Das Sparkonto ist eine rechnerische Übersicht. Die 18.000 km gelten insgesamt für deinen Vertrag; es gibt keine separate Abbuchung bei FINN.</p><div class="stats"><div class="stat"><small>Angespart</small><strong id="bankEarned">—</strong></div><div class="stat"><small>Verrechnet</small><strong id="bankSpent">—</strong></div></div></div><div class="card"><h2>Verlauf der Verrechnung</h2><p class="sub">Abgeschlossene Monate werden automatisch verrechnet. Der aktuelle Monat wird als Vorschau angezeigt.</p><div id="bankLedger"></div></div></section>
+<section class="view" id="fuel"><div class="card hero"><div class="label">TANKKOSTEN IM AKTUELLEN ZEITRAUM</div><div class="big" id="fuelTotal">0,00 €</div><div class="stats"><div class="stat"><small>Alle Tankkosten</small><strong id="fuelAll">—</strong></div><div class="stat"><small>Tankvorgänge</small><strong id="fuelCount">—</strong></div></div></div><div class="card"><h2>Tankvorgang eintragen</h2><div class="two"><div><label>Gesamtkosten (€)</label><input id="fuelCost" type="number" step="0.01" min="0.01" placeholder="55,30"></div><div><label>Getankte Liter (optional)</label><input id="fuelLiters" type="number" step="0.01" min="0" placeholder="32"></div></div><div class="two"><div><label>Tankstelle (optional)</label><input id="fuelStation" placeholder="Aral"></div><div><label>Datum</label><input id="fuelDate" type="date"></div></div><button class="primary" id="addFuel">+ Tankkosten speichern</button></div><div class="card"><h2>Tankhistorie</h2><div id="fuelHistory"></div></div></section>
+<section class="view" id="settings"><div class="card"><h2>Dein Vertrag</h2><label>Monatlicher Richtwert (km)</label><input id="limit" type="number" min="1" step="1"><label>Jahreskontingent (km)</label><input id="annualLimit" type="number" min="1" step="1"><label>Startwert: bereits gefahren im ersten Zeitraum</label><input id="baseline" type="number" min="0" step="0.1"><p class="note">Vertragsbeginn: 13.11.2026. Die Werte werden beim Verlassen eines Feldes automatisch gespeichert.</p></div><div class="card"><h2>Datensicherung</h2><p class="sub">Speichere gelegentlich eine Kopie. Deine Daten liegen nur auf diesem Gerät.</p><button class="secondary" id="export">Daten als JSON sichern</button><label>Gesicherte JSON-Datei wiederherstellen</label><input type="file" id="import" accept=".json,application/json"><p class="note">Beim Wiederherstellen werden die aktuellen App-Daten durch die Sicherung ersetzt.</p></div></section>
+<footer>Privater Kilometer-Manager · Speicherung auf diesem Gerät</footer></main>
 <script>
-const $=id=>document.getElementById(id);
-const monthKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
-const storeKey='corsa-km-manager-v1';
-let data=JSON.parse(localStorage.getItem(storeKey)||'null');
-if(!data)data={limit:1500,months:{},trips:[]};
-const current=monthKey();
-if(!data.months[current])data.months[current]={baseline:current==='2026-11'?580:0};
-let expandedMonth=current;
-const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function monthName(key){const [y,m]=key.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('de-DE',{month:'long',year:'numeric'})}
-function save(){localStorage.setItem(storeKey,JSON.stringify(data));render()}
-function fmt(n){return Number(n).toLocaleString('de-DE',{maximumFractionDigits:1})}
-function monthTrips(){return data.trips.filter(t=>t.date&&t.date.slice(0,7)===current)}
+'use strict';
+const $=id=>document.getElementById(id),KEY='corsa-km-manager-v1',fmt=n=>Number(n).toLocaleString('de-DE',{maximumFractionDigits:1}),eur=n=>Number(n).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+const contractStart=new Date(2026,10,13),today=()=>new Date(),dateISO=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,fromISO=s=>new Date(Number(s.slice(0,4)),Number(s.slice(5,7))-1,Number(s.slice(8,10)));
+const addMonths=n=>new Date(2026,10+n,13),periodIndex=d=>{let n=(d.getFullYear()-2026)*12+d.getMonth()-10;if(d<addMonths(n))n--;return n},pkey=n=>'period-'+n;
+const label=n=>{const a=addMonths(n),b=new Date(addMonths(n+1).getTime()-86400000);return `${a.toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric'})} – ${b.toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric'})}`};
+let data;try{data=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+if(!data||typeof data!=='object')data={limit:1500,months:{},trips:[]};
+data.months=data.months||{};data.trips=Array.isArray(data.trips)?data.trips:[];data.fuel=Array.isArray(data.fuel)?data.fuel:[];data.annualLimit=Number(data.annualLimit)||18000;
+if(!data.months[pkey(0)])data.months[pkey(0)]={baseline:Number(data.months['2026-11']?.baseline??580)};
+const save=()=>{localStorage.setItem(KEY,JSON.stringify(data));render()};
+const trips=n=>data.trips.filter(t=>t.date&&periodIndex(fromISO(t.date))===n);
+const used=n=>Number(data.months[pkey(n)]?.baseline||0)+trips(n).reduce((s,t)=>s+Number(t.km||0),0);
+const current=()=>Math.max(0,periodIndex(today()));
+const totalUsed=()=>{let s=0;for(let i=0;i<=Math.min(11,current());i++)s+=used(i);return s};
+let openMonth=current(),active='home';
+const node=(tag,cls,txt)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(txt!==undefined)el.textContent=txt;return el};
+function tripRow(t,allowDelete=false){const row=node('div','trip');const a=node('div');a.append(node('strong','',`${t.from} → ${t.to}`),node('small','',fromISO(t.date).toLocaleDateString('de-DE')));const b=node('div','right');b.append(node('strong','',`${fmt(t.km)} km`));if(allowDelete){const del=node('button','danger','Löschen');del.onclick=()=>{if(confirm('Fahrt wirklich löschen?')){data.trips=data.trips.filter(x=>x.id!==t.id);save()}};b.append(del)}row.append(a,b);return row}
 function render(){
- const m=data.months[current];const limit=Number(data.limit)||1500;const trips=monthTrips();const tripKm=trips.reduce((s,t)=>s+Number(t.km),0);const used=Number(m.baseline||0)+tripKm;const left=limit-used;const pct=Math.min(100,Math.max(0,used/limit*100));
- $('monthLabel').textContent=new Date().toLocaleDateString('de-DE',{month:'long',year:'numeric'});
- $('remaining').textContent=`${fmt(left)} km`;$('remaining').className='big '+(left<0?'red':'green');
- $('progress').style.width=pct+'%';$('progress').style.background=left<0?'var(--red)':'var(--green)';
- $('usedText').textContent=fmt(used)+' km';$('limitText').textContent=fmt(limit)+' km';$('totalText').textContent=fmt(used)+' km';
- const day=new Date().getDate();$('dailyText').textContent=fmt(used/day)+' km';
- const days=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();const forecast=used/day*days;
- $('forecast').textContent=`Hochrechnung bis Monatsende: etwa ${fmt(forecast)} km. `+(forecast>limit?'Du könntest dein Limit überschreiten.':'Du liegst voraussichtlich innerhalb deines Limits.');
- $('limit').value=data.limit;$('baseline').value=m.baseline??0;
- const list=$('trips');list.innerHTML='';
- const sorted=[...trips].sort((a,b)=>b.date.localeCompare(a.date));
- if(!sorted.length)list.innerHTML='<div class="empty">Noch keine Fahrten eingetragen.</div>';
- sorted.forEach(t=>{const row=document.createElement('div');row.className='trip';const left=document.createElement('div');const route=document.createElement('div');route.className='triproute';route.textContent=`${t.from} → ${t.to}`;const meta=document.createElement('div');meta.className='tripmeta';meta.textContent=new Date(t.date+'T12:00:00').toLocaleDateString('de-DE');left.append(route,meta);const right=document.createElement('div');right.style.display='flex';right.style.alignItems='center';right.style.gap='9px';const val=document.createElement('span');val.className='tripkm';val.textContent=fmt(t.km)+' km';const del=document.createElement('button');del.className='danger';del.textContent='Löschen';del.onclick=()=>{data.trips=data.trips.filter(x=>x.id!==t.id);save()};right.append(val,del);row.append(left,right);list.append(row)});
- const keys=[...new Set([current,...Object.keys(data.months||{}),...data.trips.map(t=>t.date?.slice(0,7)).filter(Boolean)])].filter(k=>/^\d{4}-\d{2}$/.test(k)).sort().reverse();
- const history=$('history');history.innerHTML='';
- keys.forEach(key=>{
-   const monthData=data.months[key]||{baseline:0};
-   const monthTrips=data.trips.filter(t=>t.date?.slice(0,7)===key).sort((a,b)=>b.date.localeCompare(a.date));
-   const amount=Number(monthData.baseline||0)+monthTrips.reduce((s,t)=>s+Number(t.km||0),0);
-   const remain=limit-amount;
-   const panel=document.createElement('div');panel.style.cssText='background:var(--panel2);border-radius:14px;padding:13px;margin-top:10px';
-   const heading=document.createElement('button');heading.className='secondary';heading.style.cssText='width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;padding:3px 0;background:transparent';
-   heading.textContent=monthName(key)+(key===current?' · Aktuell':'');
-   const arrow=document.createElement('span');arrow.textContent=expandedMonth===key?'⌃':'⌄';heading.append(arrow);
-   heading.onclick=()=>{expandedMonth=expandedMonth===key?'':key;render()};panel.append(heading);
-   const summary=document.createElement('div');summary.className='stats';summary.style.marginTop='12px';
-   summary.innerHTML='<span>Gefahren: <b>'+fmt(amount)+' km</b></span><span>Übrig: <b style="color:'+(remain<0?'var(--red)':'var(--green)')+'">'+fmt(remain)+' km</b></span>';panel.append(summary);
-   const bar=document.createElement('div');bar.className='track';bar.style.margin='10px 0 0';const fill=document.createElement('div');fill.className='fill';fill.style.width=Math.min(100,Math.max(0,amount/limit*100))+'%';if(remain<0)fill.style.background='var(--red)';bar.append(fill);panel.append(bar);
-   if(expandedMonth===key){
-     const detail=document.createElement('div');detail.style.cssText='border-top:1px solid var(--line);margin-top:12px;padding-top:10px';
-     if(Number(monthData.baseline||0)>0){const initial=document.createElement('p');initial.className='note';initial.textContent='Bereits gefahren (Startwert): '+fmt(monthData.baseline)+' km';detail.append(initial)}
-     if(!monthTrips.length){const empty=document.createElement('p');empty.className='note';empty.textContent='Keine einzelnen Fahrten für diesen Monat gespeichert.';detail.append(empty)}
-     monthTrips.forEach(t=>{const item=document.createElement('div');item.className='trip';const a=document.createElement('div');const title=document.createElement('div');title.className='triproute';title.textContent=t.from+' → '+t.to;const date=document.createElement('div');date.className='tripmeta';date.textContent=new Date(t.date+'T12:00:00').toLocaleDateString('de-DE');a.append(title,date);const km=document.createElement('span');km.className='tripkm';km.textContent=fmt(t.km)+' km';item.append(a,km);detail.append(item)});
-     panel.append(detail);
-   }
-   history.append(panel);
- });
+ const n=current(),lim=Number(data.limit)||1500,u=used(n),left=lim-u;
+ $('remaining').textContent=fmt(left)+' km';$('remaining').style.color=left<0?'#ffaaa4':'var(--green)';$('progress').style.width=Math.min(100,Math.max(0,u/lim*100))+'%';
+ $('used').textContent=fmt(u)+' km';$('annual').textContent=fmt(Number(data.annualLimit)-totalUsed())+' km';$('periodLabel').textContent=label(n)+' · Richtwert '+fmt(lim)+' km';
+ const home=$('homeTrips');home.replaceChildren();const curr=[...trips(n)].sort((a,b)=>b.date.localeCompare(a.date));if(!curr.length)home.append(node('p','sub','Noch keine einzelnen Fahrten erfasst.'));curr.forEach(t=>home.append(tripRow(t,true)));
+ const ml=$('monthList');ml.replaceChildren();for(let i=n;i>=0;i--){const panel=node('div','month'),head=node('button','month-head');head.append(node('span','',label(i)+(i===n?' · Aktuell':'')),node('span','',openMonth===i?'⌃':'⌄'));head.onclick=()=>{openMonth=openMonth===i?-1:i;render()};panel.append(head);const meta=node('div','month-meta');meta.append(node('span','',`Gefahren: ${fmt(used(i))} km`),node('span','',`Übrig: ${fmt(lim-used(i))} km`));panel.append(meta);const track=node('div','track'),bar=node('div','bar');bar.style.width=Math.min(100,Math.max(0,used(i)/lim*100))+'%';track.append(bar);panel.append(track);if(openMonth===i){const details=node('div','month-detail');const base=Number(data.months[pkey(i)]?.baseline||0);if(base)details.append(node('p','note',`Startwert: ${fmt(base)} km`));const arr=[...trips(i)].sort((a,b)=>b.date.localeCompare(a.date));if(!arr.length)details.append(node('p','sub','Keine einzelnen Fahrten gespeichert.'));arr.forEach(t=>details.append(tripRow(t,false)));panel.append(details)}ml.append(panel)}
+ let balance=0,earned=0,spent=0;const ledger=$('bankLedger');ledger.replaceChildren();
+ for(let i=0;i<n;i++){const delta=lim-used(i);balance+=delta;if(delta>=0)earned+=delta;else spent+=-delta;const r=node('div','ledger');const a=node('div');a.append(node('strong','',label(i)),node('small','',`${fmt(used(i))} km gefahren · Saldo nach Zeitraum: ${fmt(balance)} km`));r.append(a,node('strong',delta>=0?'positive':'negative',(delta>=0?'+':'')+fmt(delta)+' km'));ledger.prepend(r)}
+ const preview=lim-used(n),r=node('div','ledger'),a=node('div');a.append(node('strong','','Aktueller Zeitraum (Vorschau)'),node('small','',`${fmt(used(n))} km bisher gefahren · noch nicht abgeschlossen`));r.append(a,node('strong',preview>=0?'positive':'negative',(preview>=0?'+':'')+fmt(preview)+' km'));ledger.prepend(r);
+ $('bankBalance').textContent=fmt(balance)+' km';$('bankBalance').style.color=balance<0?'#ffaaa4':'var(--green)';$('bankEarned').textContent=fmt(earned)+' km';$('bankSpent').textContent=fmt(spent)+' km';
+ const fuel=data.fuel.filter(t=>t.date&&periodIndex(fromISO(t.date))===n);$('fuelTotal').textContent=eur(fuel.reduce((s,t)=>s+Number(t.cost),0));$('fuelAll').textContent=eur(data.fuel.reduce((s,t)=>s+Number(t.cost),0));$('fuelCount').textContent=String(data.fuel.length);
+ const history=$('fuelHistory');history.replaceChildren();const fs=[...data.fuel].sort((a,b)=>b.date.localeCompare(a.date));if(!fs.length)history.append(node('p','sub','Noch keine Tankvorgänge eingetragen.'));fs.forEach(t=>{const row=node('div','trip'),a=node('div');a.append(node('strong','',t.station||'Tankvorgang'),node('small','',`${fromISO(t.date).toLocaleDateString('de-DE')}${t.liters?' · '+fmt(t.liters)+' Liter':''}`));const b=node('div','right');b.append(node('strong','',eur(t.cost)));const del=node('button','danger','Löschen');del.onclick=()=>{if(confirm('Tankvorgang löschen?')){data.fuel=data.fuel.filter(x=>x.id!==t.id);save()}};b.append(del);row.append(a,b);history.append(row)});
+ $('limit').value=data.limit;$('annualLimit').value=data.annualLimit;$('baseline').value=data.months[pkey(0)]?.baseline||0;
 }
-$('date').value=new Date().toISOString().slice(0,10);
-$('add').onclick=()=>{const from=$('from').value.trim(),to=$('to').value.trim(),km=Number($('km').value),date=$('date').value;if(!from||!to||!date||!Number.isFinite(km)||km<=0){alert('Bitte Start, Ziel, Kilometer und Datum vollständig eintragen.');return}data.trips.push({id:Date.now().toString(),from,to,km,date});$('from').value='';$('to').value='';$('km').value='';save()};
-$('limit').onchange=()=>{data.limit=Math.max(1,Number($('limit').value)||1500);save()};
-$('baseline').onchange=()=>{data.months[current].baseline=Math.max(0,Number($('baseline').value)||0);save()};
-if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
-if(location.protocol==='https:' && !window.navigator.standalone)$('installHint').style.display='block';
-render();
-</script>
-</body>
-</html>
+function navigate(v){active=v;document.querySelectorAll('.view').forEach(e=>e.classList.toggle('active',e.id===v));$('pageTitle').textContent={home:'Startseite',months:'Monatsübersicht',bank:'Kilometertacho',fuel:'Tankkosten',settings:'Einstellungen'}[v];$('nav').classList.remove('open');$('menuBtn').setAttribute('aria-expanded','false');window.scrollTo(0,0);render()}
+$('menuBtn').onclick=()=>{const isOpen=$('nav').classList.toggle('open');$('menuBtn').setAttribute('aria-expanded',String(isOpen))};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>navigate(b.dataset.view));
+$('date').value=dateISO(today());$('fuelDate').value=dateISO(today());
+$('addTrip').onclick=()=>{const from=$('from').value.trim(),to=$('to').value.trim(),km=Number($('km').value),date=$('date').value;if(!from||!to||!date||!Number.isFinite(km)||km<=0)return alert('Bitte Start, Ziel, Datum und Kilometer eintragen.');const n=periodIndex(fromISO(date));if(n<0||n>11)return alert('Das Datum liegt außerhalb der 12 Vertragsmonate.');data.trips.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),from,to,km,date});$('from').value='';$('to').value='';$('km').value='';save()};
+$('addFuel').onclick=()=>{const cost=Number($('fuelCost').value),liters=Number($('fuelLiters').value||0),date=$('fuelDate').value,station=$('fuelStation').value.trim();if(!date||!Number.isFinite(cost)||cost<=0||liters<0)return alert('Bitte gültige Tankkosten und ein Datum eingeben.');data.fuel.push({id:String(Date.now()+Math.random()),cost,liters,station,date});$('fuelCost').value='';$('fuelLiters').value='';$('fuelStation').value='';save()};
+$('limit').onchange=()=>{data.limit=Math.max(1,Number($('limit').value)||1500);save()};$('annualLimit').onchange=()=>{data.annualLimit=Math.max(1,Number($('annualLimit').value)||18000);save()};$('baseline').onchange=()=>{data.months[pkey(0)].baseline=Math.max(0,Number($('baseline').value)||0);save()};
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='corsa-km-sicherung.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),500)};
+$('import').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const parsed=JSON.parse(await f.text());if(!Array.isArray(parsed.trips)||!parsed.months)throw Error('Ungültige Datei');if(confirm('Alle aktuellen App-Daten durch die Sicherung ersetzen?')){data=parsed;data.fuel=Array.isArray(data.fuel)?data.fuel:[];data.annualLimit=Number(data.annualLimit)||18000;save()}}catch(err){alert('Diese Datei konnte nicht als App-Sicherung gelesen werden.')}e.target.value=''};
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{});
+save();
+</script></body></html>
